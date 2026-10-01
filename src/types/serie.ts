@@ -23,3 +23,5 @@ export type UpdateSerieInput = {
 };
 
 export type SerieFilter = 'todas' | 'assistindo' | 'concluidas';
+
+export type SerieSortOrder = 'recentes' | 'maior-nota';

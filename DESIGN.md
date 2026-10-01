@@ -25,20 +25,26 @@ Usar Aurora nord11 (`#bf616a`) em ações destrutivas e erros. Reservar essa cor
 
 ## Composição
 
-A lista é a tela principal. Em celular, o conteúdo segue uma coluna com cabeçalho compacto, filtros próximos da lista, cartões de leitura rápida e uma ação evidente para cadastrar uma série.
+A lista é a tela principal e funciona como um catálogo pessoal. O cabeçalho mostra o total de séries e quantas foram concluídas; busca, filtros e ordenação ficam agrupados antes dos resultados. Os cartões dão destaque ao título e usam o número de temporadas como detalhe visual próprio do acompanhamento de séries.
 
 ```text
 ┌──────────────────────────┐
 │ MINHAS SÉRIES             │
-│ Sua programação           │
+│ Seu acervo                │
+│ ┌────────────┬─────────┐ │
+│ │ 12         │ 05      │ │
+│ │ no acervo  │ conclu. │ │
+│ └────────────┴─────────┘ │
+│ [⌕ Buscar pelo título...] │
 │ [Todas] [Assistindo] ...  │
+│ 3 resultados [↕ Recentes] │
 │ ┌──────────────────────┐  │
-│ │ Título da série      │  │
-│ │ Plataforma · 2 temp. │  │
-│ │ ★★★☆☆     Assistindo│  │
+│ │ Título      Assistindo│  │
+│ │ Plataforma           │  │
+│ │ ★★★☆☆     02 temp.   │  │
 │ └──────────────────────┘  │
 │                           │
-│        + Nova série       │
+│      + Adicionar série    │
 └──────────────────────────┘
 ```
 
@@ -50,4 +56,5 @@ A lista é a tela principal. Em celular, o conteúdo segue uma coluna com cabeç
 - Reservar Aurora vermelho para erros e exclusão; explicar o problema e a ação de recuperação em mensagens.
 - Garantir contraste legível, áreas de toque confortáveis e espaçamento consistente em todas as telas.
 - Em listas vazias, sugerir o cadastro de uma série. Em formulários, indicar como corrigir campos inválidos.
+- Mostrar a contagem geral do catálogo separada da quantidade de resultados filtrados; permitir busca por título e ordenação por data ou nota.
 - Evitar decoração sem função; usar divisores e etiquetas somente quando ajudarem a entender a informação.

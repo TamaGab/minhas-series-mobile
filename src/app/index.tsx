@@ -4,13 +4,14 @@ import {
   FlatList,
   Pressable,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getSeries } from '../database/serieRepository';
-import type { Serie, SerieFilter } from '../types/serie';
+import { getSeries, getSeriesSummary } from '../database/serieRepository';
+import type { Serie, SerieFilter, SerieSortOrder } from '../types/serie';
 
 const filters: { value: SerieFilter; label: string }[] = [
   { value: 'todas', label: 'Todas' },
@@ -54,19 +55,43 @@ function SeriesCard({ serie, onPress }: { serie: Serie; onPress: () => void }) {
   );
 }
 
-function EmptyList({ filtro }: { filtro: SerieFilter }) {
+function EmptyList({
+  filtro,
+  busca,
+  onClearSearch,
+}: {
+  filtro: SerieFilter;
+  busca: string;
+  onClearSearch: () => void;
+}) {
+  const hasSearch = busca.trim().length > 0;
   const isAll = filtro === 'todas';
 
   return (
     <View className="items-center rounded-2xl border border-nord-polar3 bg-nord-polar1 px-6 py-8">
       <Text className="mb-2 text-center text-lg font-semibold text-nord-snow6">
-        {isAll ? 'Seu catálogo está vazio' : 'Nenhuma série neste filtro'}
+        {hasSearch
+          ? 'Nenhum título encontrado'
+          : isAll
+            ? 'Seu catálogo está vazio'
+            : 'Nenhuma série neste filtro'}
       </Text>
-      <Text className="text-center text-sm leading-5 text-nord-snow6">
-        {isAll
-          ? 'Adicione sua primeira série para começar a acompanhar sua programação.'
-          : 'Quando você tiver séries nesta categoria, elas vão aparecer aqui.'}
+      <Text className="mb-5 text-center text-sm leading-5 text-nord-snow6">
+        {hasSearch
+          ? 'Tente outro título ou limpe a busca para ver o catálogo completo.'
+          : isAll
+            ? 'Adicione sua primeira série para começar a acompanhar o que assiste.'
+            : 'Quando você tiver séries nesta categoria, elas vão aparecer aqui.'}
       </Text>
+      {hasSearch ? (
+        <Pressable
+          accessibilityRole="button"
+          className="rounded-full bg-nord-polar3 px-5 py-3"
+          onPress={onClearSearch}
+        >
+          <Text className="font-semibold text-nord-snow6">Limpar busca</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -74,10 +99,16 @@ function EmptyList({ filtro }: { filtro: SerieFilter }) {
 export default function Index() {
   const router = useRouter();
   const [filtro, setFiltro] = useState<SerieFilter>('todas');
+  const [busca, setBusca] = useState('');
+  const [ordenacao, setOrdenacao] = useState<SerieSortOrder>('recentes');
   const [series, setSeries] = useState<Serie[]>([]);
+  const [summary, setSummary] = useState<{ total: number; concluidas: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState(false);
   const loadGeneration = useRef(0);
+  const summaryGeneration = useRef(0);
 
   const loadSeries = useCallback(async () => {
     const generation = loadGeneration.current + 1;
@@ -86,7 +117,7 @@ export default function Index() {
     setError(null);
 
     try {
-      const results = await getSeries(filtro);
+      const results = await getSeries(filtro, busca, ordenacao);
       if (loadGeneration.current === generation) {
         setSeries(results);
       }
@@ -100,7 +131,29 @@ export default function Index() {
         setIsLoading(false);
       }
     }
-  }, [filtro]);
+  }, [busca, filtro, ordenacao]);
+
+  const loadSummary = useCallback(async () => {
+    const generation = summaryGeneration.current + 1;
+    summaryGeneration.current = generation;
+    setIsSummaryLoading(true);
+    setSummaryError(false);
+
+    try {
+      const result = await getSeriesSummary();
+      if (summaryGeneration.current === generation) {
+        setSummary(result);
+      }
+    } catch {
+      if (summaryGeneration.current === generation) {
+        setSummaryError(true);
+      }
+    } finally {
+      if (summaryGeneration.current === generation) {
+        setIsSummaryLoading(false);
+      }
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -109,6 +162,15 @@ export default function Index() {
         loadGeneration.current += 1;
       };
     }, [loadSeries])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadSummary();
+      return () => {
+        summaryGeneration.current += 1;
+      };
+    }, [loadSummary])
   );
 
   function renderEmptyState() {
@@ -136,7 +198,7 @@ export default function Index() {
       );
     }
 
-    return <EmptyList filtro={filtro} />;
+    return <EmptyList filtro={filtro} busca={busca} onClearSearch={() => setBusca('')} />;
   }
 
   return (
@@ -155,9 +217,76 @@ export default function Index() {
               <Text className="text-xs font-semibold uppercase tracking-[2px] text-nord-frost8">
                 MINHAS SÉRIES
               </Text>
-              <Text className="mt-2 text-3xl font-bold text-nord-snow6">Sua programação</Text>
+              <Text className="mt-2 text-3xl font-bold text-nord-snow6">Seu acervo</Text>
             </View>
-            <View className="mb-5 flex-row gap-2">
+
+            <View className="mb-6 flex-row rounded-2xl border border-nord-polar3 bg-nord-polar1 px-5 py-4">
+              <View className="flex-1 border-r border-nord-polar3 pr-4">
+                <Text className="text-3xl font-bold text-nord-frost8">
+                  {summary ? String(summary.total).padStart(2, '0') : '—'}
+                </Text>
+                <Text className="mt-1 text-[10px] font-semibold uppercase tracking-[1.5px] text-nord-snow6">
+                  No catálogo
+                </Text>
+              </View>
+              <View className="flex-1 pl-5">
+                <Text className="text-3xl font-bold text-nord-aurora14">
+                  {summary ? String(summary.concluidas).padStart(2, '0') : '—'}
+                </Text>
+                <Text className="mt-1 text-[10px] font-semibold uppercase tracking-[1.5px] text-nord-snow6">
+                  Concluídas
+                </Text>
+              </View>
+              {isSummaryLoading ? (
+                <ActivityIndicator
+                  accessibilityLabel="Atualizando o resumo do catálogo"
+                  className="absolute right-4 top-4"
+                  color="#88c0d0"
+                  size="small"
+                />
+              ) : null}
+              {summaryError ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Tentar carregar o resumo novamente"
+                  className="absolute right-3 top-3 rounded-full p-2"
+                  onPress={() => void loadSummary()}
+                >
+                  <Text className="text-xs font-semibold text-nord-aurora11">Tentar</Text>
+                </Pressable>
+              ) : null}
+            </View>
+
+            <View className="mb-4 flex-row items-center rounded-xl border border-nord-polar3 bg-nord-polar1 px-4">
+              <Text accessibilityElementsHidden className="mr-3 text-xl text-nord-frost8">
+                ⌕
+              </Text>
+              <TextInput
+                accessibilityLabel="Buscar série pelo título"
+                autoCapitalize="none"
+                autoCorrect={false}
+                className="min-h-12 flex-1 py-3 text-base text-nord-snow6"
+                keyboardAppearance="dark"
+                onChangeText={setBusca}
+                placeholder="Buscar pelo título"
+                placeholderTextColor="#d8dee9"
+                returnKeyType="search"
+                selectionColor="#88c0d0"
+                value={busca}
+              />
+              {busca.length > 0 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Limpar busca"
+                  className="min-h-10 min-w-10 items-center justify-center"
+                  onPress={() => setBusca('')}
+                >
+                  <Text className="text-xl text-nord-snow6">×</Text>
+                </Pressable>
+              ) : null}
+            </View>
+
+            <View className="mb-4 flex-row gap-2">
               {filters.map((option) => {
                 const isSelected = filtro === option.value;
 
@@ -182,6 +311,27 @@ export default function Index() {
                 );
               })}
             </View>
+
+            <View className="mb-4 flex-row items-center justify-between">
+              <Text className="text-xs font-semibold uppercase tracking-wide text-nord-snow6">
+                {isLoading ? 'Buscando...' : `${series.length} ${series.length === 1 ? 'resultado' : 'resultados'}`}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Ordenação: ${ordenacao === 'recentes' ? 'mais recentes' : 'maior nota'}. Toque para alternar.`}
+                className="min-h-10 flex-row items-center rounded-full border border-nord-polar3 bg-nord-polar1 px-3"
+                onPress={() =>
+                  setOrdenacao((current) => (current === 'recentes' ? 'maior-nota' : 'recentes'))
+                }
+              >
+                <Text className="mr-2 text-sm text-nord-frost8">
+                  {ordenacao === 'recentes' ? '↕' : '★'}
+                </Text>
+                <Text className="text-xs font-semibold text-nord-snow6">
+                  {ordenacao === 'recentes' ? 'Mais recentes' : 'Maior nota'}
+                </Text>
+              </Pressable>
+            </View>
           </>
         }
         renderItem={({ item }) => (
@@ -197,7 +347,7 @@ export default function Index() {
           className="items-center rounded-full bg-nord-frost8 px-6 py-4"
           onPress={() => router.push('/form')}
         >
-          <Text className="text-base font-bold text-nord-polar0">+ Nova série</Text>
+          <Text className="text-base font-bold text-nord-polar0">+ Adicionar série</Text>
         </Pressable>
       </View>
     </SafeAreaView>

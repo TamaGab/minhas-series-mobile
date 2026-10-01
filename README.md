@@ -2,7 +2,7 @@
 
 Aplicativo mobile para registrar séries, acompanhar o que está em andamento e guardar os dados no SQLite. O projeto usa Expo Router, TypeScript e NativeWind, com visual baseado no tema Nord escuro.
 
-O desenvolvimento segue as etapas de `projeto-minhas-series.md`. Até a etapa 7, estão implementados a configuração, os tipos, o SQLite, o repositório, a lista, o formulário de cadastro e edição e a tela de detalhe com ações para concluir, editar e excluir séries.
+O desenvolvimento segue as etapas de `projeto-minhas-series.md`. Até a etapa 7, estão implementados a configuração, os tipos, o SQLite, o repositório, a lista, o formulário de cadastro e edição e a tela de detalhe com ações para concluir, editar e excluir séries. A lista também oferece busca por título, resumo do catálogo e ordenação por data ou nota.
 
 ## Como rodar
 
@@ -106,3 +106,15 @@ Pendente para a etapa 8. O vídeo ou os prints do cadastro, edição, conclusão
 **O que eu pedi:** definir para onde a tela deve ir depois de marcar ou desmarcar uma série como concluída.
 **O que a IA sugeriu (resumo):** permanecer no detalhe e atualizar o estado e a ação disponível.
 **O que eu fiz:** aceitei; assim dá para conferir o novo status sem sair da série.
+
+### Registro 14 — Melhoria da lista
+
+**O que eu pedi:** deixar a tela inicial menos genérica, manter os filtros e implementar busca por título, contador e ordenação do roteiro.
+**O que a IA sugeriu (resumo):** preservar a paleta Nord e organizar a lista como um catálogo, com resumo em destaque e cartões que dão mais ênfase às temporadas e à nota.
+**O que eu fiz:** aceitei a direção, mantendo a paleta atual e pedindo a inclusão de todas as opções do roteiro.
+
+### Registro 15 — Revisão da lista
+
+**O que eu pedi:** o primeiro redesenho ainda parecia genérico e perguntei que outras direções seriam possíveis.
+**O que a IA sugeriu (resumo):** trocar cartões e cápsulas por um arquivo tipográfico com linhas numeradas, divisores e filtros sublinhados.
+**O que eu fiz:** pedi para experimentar a proposta, mas depois preferi voltar ao layout anterior e manter a paleta Nord.

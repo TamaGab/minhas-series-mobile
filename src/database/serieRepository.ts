@@ -1,18 +1,51 @@
-import type { CreateSerieInput, Serie, SerieFilter, UpdateSerieInput } from '../types/serie';
+import type {
+  CreateSerieInput,
+  Serie,
+  SerieFilter,
+  SerieSortOrder,
+  UpdateSerieInput,
+} from '../types/serie';
 import { getDatabase } from './database';
 
-export async function getSeries(filtro: SerieFilter): Promise<Serie[]> {
+export async function getSeries(
+  filtro: SerieFilter,
+  busca: string,
+  ordenacao: SerieSortOrder
+): Promise<Serie[]> {
   const database = await getDatabase();
+  const conditions: string[] = [];
+  const parameters: (string | number)[] = [];
 
-  if (filtro === 'todas') {
-    return database.getAllAsync<Serie>('SELECT * FROM series ORDER BY createdAt DESC, id DESC');
+  if (filtro !== 'todas') {
+    conditions.push('concluida = ?');
+    parameters.push(filtro === 'concluidas' ? 1 : 0);
   }
 
-  const concluida = filtro === 'concluidas' ? 1 : 0;
+  const titulo = busca.trim();
+  if (titulo.length > 0) {
+    conditions.push('titulo LIKE ? COLLATE NOCASE');
+    parameters.push(`%${titulo}%`);
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const orderClause =
+    ordenacao === 'maior-nota'
+      ? 'CASE WHEN nota IS NULL THEN 1 ELSE 0 END ASC, nota DESC, createdAt DESC, id DESC'
+      : 'createdAt DESC, id DESC';
+
   return database.getAllAsync<Serie>(
-    'SELECT * FROM series WHERE concluida = ? ORDER BY createdAt DESC, id DESC',
-    concluida
+    `SELECT * FROM series ${whereClause} ORDER BY ${orderClause}`,
+    ...parameters
   );
+}
+
+export async function getSeriesSummary(): Promise<{ total: number; concluidas: number }> {
+  const database = await getDatabase();
+  const summary = await database.getFirstAsync<{ total: number; concluidas: number }>(
+    'SELECT COUNT(*) AS total, COUNT(CASE WHEN concluida = 1 THEN 1 END) AS concluidas FROM series'
+  );
+
+  return summary ?? { total: 0, concluidas: 0 };
 }
 
 export async function getSerieById(id: number): Promise<Serie | null> {
