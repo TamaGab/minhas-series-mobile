@@ -2,7 +2,7 @@
 
 Aplicativo mobile para registrar séries, acompanhar o que está em andamento e guardar os dados no SQLite. O projeto usa Expo Router, TypeScript e NativeWind, com visual baseado no tema Nord escuro.
 
-O desenvolvimento segue as etapas de `projeto-minhas-series.md`. Até a etapa 4, a configuração, os tipos, a tabela e o repositório estão implementados. A interface de cadastro e consulta ainda será construída nas próximas etapas.
+O desenvolvimento segue as etapas de `projeto-minhas-series.md`. Até a etapa 5, estão implementados a configuração, os tipos, o SQLite, o repositório, a lista e a navegação inicial. As telas de cadastro e detalhe estão provisórias e serão concluídas nas etapas seguintes.
 
 ## Como rodar
 
@@ -63,3 +63,13 @@ Pendente para a etapa 8. O vídeo ou os prints do cadastro, edição, conclusão
 **O que eu pedi:** avisar quando o formulário tentar salvar sem nenhuma mudança e confirmar a intenção.
 **O que a IA sugeriu (resumo):** deixar a confirmação no formulário, pois o repositório não controla avisos visuais; uma atualização vazia não grava no banco.
 **O que eu fiz:** perguntei qual camada seria mais simples. A confirmação no formulário ficou planejada para a etapa 6.
+
+### Registro 8 — Etapa 5
+**O que eu pedi:** continuar para a etapa 5.
+**O que a IA sugeriu (resumo):** ligar os atalhos desde já e criar telas provisórias para manter a navegação funcionando durante o desenvolvimento.
+**O que eu fiz:** escolhi as telas provisórias, que serão substituídas nas etapas 6 e 7.
+
+### Registro 9 — Etapa 5
+**O que eu pedi:** implementar a lista seguindo o roteiro, inclusive a atualização ao voltar de outra tela.
+**O que a IA sugeriu (resumo):** usar `useFocusEffect` para carregar de novo quando a lista volta ao foco. A rota continua montada na pilha, então um `useEffect` com `[]` não executaria outra vez. O `useCallback` mantém a mesma função entre renderizações e evita que o efeito de foco dispare em cada render.
+**O que eu fiz:** aceitei o padrão e usei `useFocusEffect` com `useCallback` na lista.
