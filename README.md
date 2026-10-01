@@ -2,7 +2,7 @@
 
 Aplicativo mobile para registrar séries, acompanhar o que está em andamento e guardar os dados no SQLite. O projeto usa Expo Router, TypeScript e NativeWind, com visual baseado no tema Nord escuro.
 
-O desenvolvimento segue as etapas de `projeto-minhas-series.md`. Até a etapa 6, estão implementados a configuração, os tipos, o SQLite, o repositório, a lista, o formulário de cadastro e edição e a navegação inicial. A tela de detalhe ainda é provisória e será concluída na etapa seguinte.
+O desenvolvimento segue as etapas de `projeto-minhas-series.md`. Até a etapa 7, estão implementados a configuração, os tipos, o SQLite, o repositório, a lista, o formulário de cadastro e edição e a tela de detalhe com ações para concluir, editar e excluir séries.
 
 ## Como rodar
 
@@ -100,3 +100,9 @@ Pendente para a etapa 8. O vídeo ou os prints do cadastro, edição, conclusão
 **O que eu pedi:** definir o que acontece ao editar com um ID inválido ou inexistente.
 **O que a IA sugeriu (resumo):** mostrar uma mensagem de erro e um botão para voltar à lista.
 **O que eu fiz:** aceitei essa opção.
+
+### Registro 13 — Etapa 7
+
+**O que eu pedi:** definir para onde a tela deve ir depois de marcar ou desmarcar uma série como concluída.
+**O que a IA sugeriu (resumo):** permanecer no detalhe e atualizar o estado e a ação disponível.
+**O que eu fiz:** aceitei; assim dá para conferir o novo status sem sair da série.
